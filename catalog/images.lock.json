@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "profile": "hello-world",
+  "images": [
+    {
+      "name": "hello-world",
+      "ref": "ghcr.io/techofourown/sw-ourbox-apps-hello-world/hello-world@sha256:d29428789d671b9405ab202413f5eff4d2fb4870f80791050430bce24ccac2d6",
+      "used_by": [
+        "hello-world"
+      ]
+    }
+  ]
+}

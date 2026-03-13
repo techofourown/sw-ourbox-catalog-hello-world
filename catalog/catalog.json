@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "kind": "ourbox-application-catalog",
+  "catalog_id": "hello-world",
+  "catalog_name": "Hello World Catalog",
+  "catalog_description": "Minimal catalog that consumes only the hello-world app published by sw-ourbox-apps-hello-world.",
+  "default_app_ids": [
+    "hello-world"
+  ],
+  "apps": [
+    {
+      "id": "hello-world",
+      "display_name": "Hello World",
+      "description": "A tiny hello-world application used to prove multi-repository catalog consumption.",
+      "renderer": "hello-world",
+      "service_name": "hello-world",
+      "service_port": 80,
+      "host_template": "hello.{box_host}",
+      "path": "/",
+      "expected_status": 200,
+      "body_marker": "Hello, world.",
+      "route_description": "hello-world-root",
+      "default_backend": false,
+      "image_names": [
+        "hello-world"
+      ]
+    }
+  ]
+}

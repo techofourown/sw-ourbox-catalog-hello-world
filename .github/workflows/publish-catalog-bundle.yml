@@ -1,0 +1,59 @@
+name: Publish Application Catalog Bundle
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oras-project/setup-oras@v1
+      - name: Render catalog bundle
+        run: bash scripts/render-catalog-bundle.sh
+      - name: Login to GHCR
+        run: echo "${GITHUB_TOKEN}" | oras login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish bundle
+        run: |
+          REF="ghcr.io/techofourown/sw-ourbox-catalog-hello-world:latest"
+          oras push \
+            --artifact-type application/vnd.techofourown.ourbox.application-catalog.v1.tar+gzip \
+            "${REF}" \
+            dist/application-catalog-bundle.tar.gz:application/vnd.techofourown.ourbox.application-catalog.v1.tar+gzip
+          DIGEST="$(oras resolve "${REF}")"
+          DIGEST="${DIGEST}" python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          record = {
+              "schema": 1,
+              "kind": "ourbox-application-catalog-bundle-publish-record",
+              "catalog_id": "hello-world",
+              "catalog_name": "Hello World Catalog",
+              "artifact_ref": f"ghcr.io/techofourown/sw-ourbox-catalog-hello-world@{os.environ['DIGEST']}",
+              "artifact_digest": os.environ["DIGEST"],
+              "github_sha": os.environ["GITHUB_SHA"],
+              "github_run_id": os.environ["GITHUB_RUN_ID"],
+              "github_run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+          }
+          Path("dist/catalog-bundle.publish-record.json").write_text(
+              json.dumps(record, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hello-world-catalog-bundle
+          path: |
+            dist/application-catalog-bundle.tar.gz
+            dist/application-catalog-bundle.tar.gz.sha256
+            dist/catalog-bundle.publish-record.json

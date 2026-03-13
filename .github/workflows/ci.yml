@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON and render bundle
+        run: |
+          python3 -m json.tool catalog/catalog.json >/dev/null
+          python3 -m json.tool catalog/images.lock.json >/dev/null
+          bash scripts/render-catalog-bundle.sh
+          test -f dist/application-catalog-bundle.tar.gz
+          test -f dist/application-catalog-bundle.tar.gz.sha256
