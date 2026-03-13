@@ -10,6 +10,7 @@
   "apps": [
     {
       "id": "hello-world",
+      "app_uid": "techofourown/hello-world",
       "display_name": "Hello World",
       "description": "A tiny hello-world application used to prove multi-repository catalog consumption.",
       "renderer": "hello-world",
