@@ -1,10 +1,11 @@
 # sw-ourbox-catalog-hello-world
 
-`sw-ourbox-catalog-hello-world` is a minimal OurBox application catalog repo.
+`sw-ourbox-catalog-hello-world` is a small OurBox application catalog repo.
 
 It consumes the published `hello-world` image from
-`sw-ourbox-apps-hello-world` and publishes a catalog bundle artifact that can
-be selected by the installer and expanded into a concrete application set.
+`sw-ourbox-apps-hello-world` plus the `ourbox-chat` image from
+`sw-ourbox-apps-chat`, then publishes a catalog bundle artifact that can be
+selected by the installer and expanded into a concrete application set.
 
 ## What this repo owns
 
@@ -16,6 +17,7 @@ be selected by the installer and expanded into a concrete application set.
 ## Consumed application images
 
 - `ghcr.io/techofourown/sw-ourbox-apps-hello-world/hello-world@sha256:d29428789d671b9405ab202413f5eff4d2fb4870f80791050430bce24ccac2d6`
+- `ghcr.io/techofourown/sw-ourbox-apps-chat/ourbox-chat@sha256:aca801829c4bd6f1c5c47876de612ed1453907a7424326caf36acec5ccd8ff3e`
 
 ## Repository layout
 
