@@ -3,10 +3,10 @@
   "kind": "ourbox-application-catalog",
   "catalog_id": "hello-world",
   "catalog_name": "Hello World Catalog",
-  "catalog_description": "Small catalog that consumes the hello-world app and the offline-bundled Woodbox Chat app.",
+  "catalog_description": "Small catalog that consumes the hello-world app and the offline-bundled OurBox Chat app.",
   "default_app_ids": [
     "hello-world",
-    "woodbox-chat"
+    "ourbox-chat"
   ],
   "apps": [
     {
@@ -28,21 +28,21 @@
       ]
     },
     {
-      "id": "woodbox-chat",
-      "app_uid": "techofourown/woodbox-chat",
-      "display_name": "Woodbox Chat",
+      "id": "ourbox-chat",
+      "app_uid": "techofourown/ourbox-chat",
+      "display_name": "OurBox Chat",
       "description": "CPU-only local chat UI backed by a bundled small GGUF model.",
       "renderer": "static-http",
-      "service_name": "woodbox-chat",
+      "service_name": "ourbox-chat",
       "service_port": 8080,
       "host_template": "chat.{box_host}",
       "path": "/",
       "expected_status": 200,
-      "body_marker": "llama.cpp",
-      "route_description": "woodbox-chat-root",
+      "body_marker": "OurBox Chat",
+      "route_description": "ourbox-chat-root",
       "default_backend": false,
       "image_names": [
-        "woodbox-chat"
+        "ourbox-chat"
       ]
     }
   ]

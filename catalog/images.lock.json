@@ -10,10 +10,10 @@
       ]
     },
     {
-      "name": "woodbox-chat",
-      "ref": "ghcr.io/techofourown/sw-ourbox-apps-chat/woodbox-chat@sha256:535b7d4f380a3cfde35501f0303bf4fd26f3bf528670bf05c00c96d0c525c5d2",
+      "name": "ourbox-chat",
+      "ref": "ghcr.io/techofourown/sw-ourbox-apps-chat/ourbox-chat@sha256:aca801829c4bd6f1c5c47876de612ed1453907a7424326caf36acec5ccd8ff3e",
       "used_by": [
-        "woodbox-chat"
+        "ourbox-chat"
       ]
     }
   ]
