@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate JSON and render bundle
-        run: |
-          python3 -m json.tool catalog/catalog.json >/dev/null
-          python3 -m json.tool catalog/images.lock.json >/dev/null
-          bash scripts/render-catalog-bundle.sh
-          test -f dist/application-catalog-bundle.tar.gz
-          test -f dist/application-catalog-bundle.tar.gz.sha256
+      - uses: oras-project/setup-oras@v1
+      - name: Validate script syntax
+        run: bash -n scripts/render-catalog-bundle.sh scripts/check-catalog-bundle-smoke.sh scripts/check-image-refs-exist.sh
+      - name: Validate and render catalog bundle
+        run: bash scripts/check-catalog-bundle-smoke.sh
+      - name: Validate referenced images exist
+        run: bash scripts/check-image-refs-exist.sh

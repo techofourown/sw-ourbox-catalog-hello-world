@@ -16,6 +16,7 @@ cp "${CATALOG_DIR}/profile.env" "${BUNDLE_DIR}/profile.env"
 
 python3 - <<'PY' "${CATALOG_DIR}/catalog.json" "${CATALOG_DIR}/images.lock.json" > "${BUNDLE_DIR}/manifest.env"
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,12 +24,13 @@ from pathlib import Path
 catalog = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 images = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 
+name_slug = re.sub(r"[^a-z0-9]+", "-", catalog["catalog_name"].strip().lower()).strip("-")
 default_ids = ",".join(catalog["default_app_ids"])
 created = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 lines = [
     f"OURBOX_APPLICATION_CATALOG_ID={catalog['catalog_id']}",
-    f"OURBOX_APPLICATION_CATALOG_NAME={catalog['catalog_name']}",
+    f"OURBOX_APPLICATION_CATALOG_NAME_SLUG={name_slug}",
     f"OURBOX_APPLICATION_CATALOG_CREATED={created}",
     f"OURBOX_APPLICATION_CATALOG_DEFAULT_APP_IDS={default_ids}",
     f"OURBOX_APPLICATION_CATALOG_APP_COUNT={len(catalog['apps'])}",
