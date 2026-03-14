@@ -17,7 +17,7 @@ selected by the installer and expanded into a concrete application set.
 ## Consumed application images
 
 - `ghcr.io/techofourown/sw-ourbox-apps-hello-world/hello-world@sha256:d29428789d671b9405ab202413f5eff4d2fb4870f80791050430bce24ccac2d6`
-- `ghcr.io/techofourown/sw-ourbox-apps-chat/ourbox-chat@sha256:aca801829c4bd6f1c5c47876de612ed1453907a7424326caf36acec5ccd8ff3e`
+- `ghcr.io/techofourown/sw-ourbox-apps-chat/ourbox-chat@sha256:e6e6c73bea0e85f3a8440f906b035d232596fe7da7eb7d168b6ab165de5d7580`
 
 ## Repository layout
 
