@@ -142,6 +142,8 @@ if profile.get("OURBOX_APPLICATION_CATALOG_ID") != catalog["catalog_id"]:
     raise SystemExit("profile catalog id mismatch")
 if profile.get("OURBOX_APPLICATION_CATALOG_NAME_SLUG") != expected_slug:
     raise SystemExit("profile catalog name slug mismatch")
+if profile.get("OURBOX_APPLICATION_CATALOG_DEFAULT_APP_IDS") != ",".join(catalog["default_app_ids"]):
+    raise SystemExit("profile default app ids mismatch")
 PY
 
 printf '[%s] catalog bundle smoke passed\n' "$(date -Is)"
