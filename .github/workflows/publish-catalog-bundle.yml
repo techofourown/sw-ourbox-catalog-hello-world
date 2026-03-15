@@ -27,14 +27,21 @@ jobs:
       - name: Publish bundle
         run: |
           REF="ghcr.io/techofourown/sw-ourbox-catalog-hello-world:latest"
-          IMMUTABLE_TAG="sha-${GITHUB_SHA}"
+          IMMUTABLE_TAG="sha-${GITHUB_SHA}-run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           IMMUTABLE_REF="ghcr.io/techofourown/sw-ourbox-catalog-hello-world:${IMMUTABLE_TAG}"
           oras push \
             --artifact-type application/vnd.techofourown.ourbox.application-catalog.v1.tar+gzip \
-            "${REF}" \
+            "${IMMUTABLE_REF}" \
             dist/application-catalog-bundle.tar.gz:application/vnd.techofourown.ourbox.application-catalog.v1.tar+gzip
-          DIGEST="$(oras resolve "${REF}")"
-          oras tag "${REF}" "${IMMUTABLE_TAG}" >/dev/null
+          DIGEST="$(oras resolve "${IMMUTABLE_REF}")"
+          oras tag "${IMMUTABLE_REF}" latest >/dev/null
+          LATEST_DIGEST="$(oras resolve "${REF}")"
+          [[ "${LATEST_DIGEST}" == "${DIGEST}" ]] || {
+            echo "latest tag did not resolve to the published immutable digest" >&2
+            echo "expected: ${DIGEST}" >&2
+            echo "actual:   ${LATEST_DIGEST}" >&2
+            exit 1
+          }
           DIGEST="${DIGEST}" MUTABLE_REF="${REF}" IMMUTABLE_REF="${IMMUTABLE_REF}" python3 - <<'PY'
           import json
           import os
