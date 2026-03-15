@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: rhysd/actionlint@v1
+      - uses: rhysd/actionlint@v1.7.11
       - uses: oras-project/setup-oras@v1
       - name: Validate script syntax
         run: bash -n scripts/render-catalog-bundle.sh scripts/check-catalog-bundle-smoke.sh scripts/check-image-refs-exist.sh scripts/check-publish-workflow.sh
