@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "profile": "hello-world",
+  "images": [
+    {
+      "name": "hello-world",
+      "ref": "ghcr.io/techofourown/sw-ourbox-apps-hello-world/hello-world:latest",
+      "used_by": [
+        "hello-world"
+      ]
+    },
+    {
+      "name": "ourbox-chat",
+      "ref": "ghcr.io/techofourown/sw-ourbox-apps-chat/ourbox-chat:latest",
+      "used_by": [
+        "ourbox-chat"
+      ]
+    }
+  ]
+}

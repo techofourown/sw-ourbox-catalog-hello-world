@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  repository_dispatch:
+    types:
+      - refresh-from-upstream-image-publish
   workflow_dispatch:
 
 jobs:
@@ -24,12 +27,15 @@ jobs:
       - name: Publish bundle
         run: |
           REF="ghcr.io/techofourown/sw-ourbox-catalog-hello-world:latest"
+          IMMUTABLE_TAG="sha-${GITHUB_SHA}"
+          IMMUTABLE_REF="ghcr.io/techofourown/sw-ourbox-catalog-hello-world:${IMMUTABLE_TAG}"
           oras push \
             --artifact-type application/vnd.techofourown.ourbox.application-catalog.v1.tar+gzip \
             "${REF}" \
             dist/application-catalog-bundle.tar.gz:application/vnd.techofourown.ourbox.application-catalog.v1.tar+gzip
           DIGEST="$(oras resolve "${REF}")"
-          DIGEST="${DIGEST}" python3 - <<'PY'
+          oras tag "${REF}" "${IMMUTABLE_TAG}" >/dev/null
+          DIGEST="${DIGEST}" MUTABLE_REF="${REF}" IMMUTABLE_REF="${IMMUTABLE_REF}" python3 - <<'PY'
           import json
           import os
           from pathlib import Path
@@ -39,6 +45,8 @@ jobs:
               "kind": "ourbox-application-catalog-bundle-publish-record",
               "catalog_id": "hello-world",
               "catalog_name": "Hello World Catalog",
+              "mutable_ref": os.environ["MUTABLE_REF"],
+              "immutable_ref": os.environ["IMMUTABLE_REF"],
               "artifact_ref": f"ghcr.io/techofourown/sw-ourbox-catalog-hello-world@{os.environ['DIGEST']}",
               "artifact_digest": os.environ["DIGEST"],
               "github_sha": os.environ["GITHUB_SHA"],
@@ -56,4 +64,5 @@ jobs:
           path: |
             dist/application-catalog-bundle.tar.gz
             dist/application-catalog-bundle.tar.gz.sha256
+            dist/images.lock.json
             dist/catalog-bundle.publish-record.json
