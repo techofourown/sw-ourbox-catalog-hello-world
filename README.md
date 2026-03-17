@@ -19,6 +19,11 @@ selected by the installer and expanded into a concrete application set.
 - `ghcr.io/techofourown/sw-ourbox-apps-hello-world/hello-world:latest`
 - `ghcr.io/techofourown/sw-ourbox-apps-chat/ourbox-chat:latest`
 
+This repo also publishes installer-browsable catalog rows at
+`ghcr.io/techofourown/sw-ourbox-catalog-hello-world:catalog-amd64`. Those rows
+let host-side installers resolve the newest stable bundle whose
+`OURBOX_PLATFORM_CONTRACT_DIGEST` matches the selected OS payload contract.
+
 ## Repository layout
 
 - [catalog/catalog.json](/techofourown/sw-ourbox-catalog-hello-world/catalog/catalog.json)

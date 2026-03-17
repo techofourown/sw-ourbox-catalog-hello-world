@@ -17,6 +17,8 @@ need_cmd python3
 need_cmd tar
 need_cmd sha256sum
 
+python3 -m py_compile "${ROOT}/scripts/render-catalog-rows.py"
+
 python3 - <<'PY' "${ROOT}/catalog/catalog.json" "${ROOT}/catalog/image-sources.json" "${ROOT}/catalog/profile.env"
 import json
 import re
@@ -177,6 +179,48 @@ for image in images_lock["images"]:
         raise SystemExit(f"generated image lock name missing from image-sources.json: {image['name']}")
     if source_entry["used_by"] != image["used_by"]:
         raise SystemExit(f"generated image lock used_by mismatch for {image['name']}")
+PY
+
+python3 "${ROOT}/scripts/render-catalog-rows.py" \
+  --catalog-json "${ROOT}/catalog/catalog.json" \
+  --profile-env "${ROOT}/catalog/profile.env" \
+  --images-lock "${ROOT}/dist/images.lock.json" \
+  --out-catalog "${TMP_ROOT}/catalog.tsv" \
+  --channel stable \
+  --tag "sha-test-run-1" \
+  --created "2026-03-17T00:00:00Z" \
+  --version "main-deadbeefcafe" \
+  --revision "deadbeefcafedeadbeefcafedeadbeefcafedead" \
+  --arch amd64 \
+  --artifact-digest "sha256:1111111111111111111111111111111111111111111111111111111111111111" \
+  --pinned-ref "ghcr.io/example/sw-ourbox-catalog-hello-world@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+
+python3 - <<'PY' "${TMP_ROOT}/catalog.tsv"
+import csv
+import sys
+from pathlib import Path
+
+rows = list(csv.DictReader(Path(sys.argv[1]).open("r", encoding="utf-8"), delimiter="\t"))
+if len(rows) != 1:
+    raise SystemExit(f"expected one rendered catalog row, got {len(rows)}")
+row = rows[0]
+expected = {
+    "channel": "stable",
+    "tag": "sha-test-run-1",
+    "created": "2026-03-17T00:00:00Z",
+    "version": "main-deadbeefcafe",
+    "revision": "deadbeefcafedeadbeefcafedeadbeefcafedead",
+    "arch": "amd64",
+    "platform_contract_digest": "sha256:636af2d46d04b086366e97184d4e257d6c6e7dc75f070758d032cdd3cd4ff976",
+    "platform_profile": "hello-world",
+    "artifact_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "pinned_ref": "ghcr.io/example/sw-ourbox-catalog-hello-world@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+}
+for key, expected_value in expected.items():
+    if row.get(key) != expected_value:
+        raise SystemExit(f"unexpected {key}: {row.get(key)!r}")
+if len(str(row.get("platform_images_lock_sha256", ""))) != 64:
+    raise SystemExit(f"unexpected platform_images_lock_sha256: {row.get('platform_images_lock_sha256')!r}")
 PY
 
 printf '[%s] catalog bundle smoke passed\n' "$(date -Is)"
