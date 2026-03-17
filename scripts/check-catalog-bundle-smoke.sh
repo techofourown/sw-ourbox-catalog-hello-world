@@ -211,7 +211,7 @@ expected = {
     "version": "main-deadbeefcafe",
     "revision": "deadbeefcafedeadbeefcafedeadbeefcafedead",
     "arch": "amd64",
-    "platform_contract_digest": "sha256:636af2d46d04b086366e97184d4e257d6c6e7dc75f070758d032cdd3cd4ff976",
+    "platform_contract_digest": "sha256:bbdb22bf88595c9817c3e90a3171aa4e3ff8571c105e38e689db722a01cebf49",
     "platform_profile": "hello-world",
     "artifact_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
     "pinned_ref": "ghcr.io/example/sw-ourbox-catalog-hello-world@sha256:1111111111111111111111111111111111111111111111111111111111111111",
