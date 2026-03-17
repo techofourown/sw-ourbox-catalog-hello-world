@@ -13,7 +13,7 @@
       "id": "hello-world",
       "app_uid": "techofourown/hello-world",
       "display_name": "Hello World",
-      "description": "A tiny hello-world application used to prove multi-repository catalog consumption.",
+      "description": "Small hello-world app sourced from a second sw-ourbox-apps repo.",
       "renderer": "hello-world",
       "service_name": "hello-world",
       "service_port": 80,
