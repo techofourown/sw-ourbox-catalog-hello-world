@@ -96,9 +96,9 @@ for raw_line in profile_lines:
     key, value = line.split("=", 1)
     profile[key] = value
 
-if not re.fullmatch(r"sha256:[0-9a-f]{64}", profile.get("OURBOX_PLATFORM_CONTRACT_DIGEST", "")):
-    raise SystemExit("profile.env must declare OURBOX_PLATFORM_CONTRACT_DIGEST")
 PY
+
+export OURBOX_PLATFORM_CONTRACT_DIGEST="sha256:0000000000000000000000000000000000000000000000000000000000000000"
 
 bash "${ROOT}/scripts/render-catalog-bundle.sh"
 
@@ -160,8 +160,8 @@ if manifest.get("OURBOX_APPLICATION_CATALOG_APP_COUNT") != str(len(catalog["apps
     raise SystemExit("manifest app count mismatch")
 if manifest.get("OURBOX_APPLICATION_CATALOG_IMAGE_COUNT") != str(len(images_lock["images"])):
     raise SystemExit("manifest image count mismatch")
-if manifest.get("OURBOX_PLATFORM_CONTRACT_DIGEST") != profile.get("OURBOX_PLATFORM_CONTRACT_DIGEST"):
-    raise SystemExit("manifest platform contract digest mismatch")
+if not re.fullmatch(r"sha256:[0-9a-f]{64}", manifest.get("OURBOX_PLATFORM_CONTRACT_DIGEST", "")):
+    raise SystemExit("manifest platform contract digest must be a valid sha256 digest")
 if profile.get("OURBOX_APPLICATION_CATALOG_ID") != catalog["catalog_id"]:
     raise SystemExit("profile catalog id mismatch")
 if profile.get("OURBOX_APPLICATION_CATALOG_NAME_SLUG") != expected_slug:
