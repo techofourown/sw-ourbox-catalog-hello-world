@@ -126,6 +126,7 @@ python3 - <<'PY' \
   "${ROOT}/catalog/image-sources.json" \
   "${ROOT}/dist/images.lock.json"
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -160,8 +161,9 @@ if manifest.get("OURBOX_APPLICATION_CATALOG_APP_COUNT") != str(len(catalog["apps
     raise SystemExit("manifest app count mismatch")
 if manifest.get("OURBOX_APPLICATION_CATALOG_IMAGE_COUNT") != str(len(images_lock["images"])):
     raise SystemExit("manifest image count mismatch")
-if not re.fullmatch(r"sha256:[0-9a-f]{64}", manifest.get("OURBOX_PLATFORM_CONTRACT_DIGEST", "")):
-    raise SystemExit("manifest platform contract digest must be a valid sha256 digest")
+expected_digest = os.environ["OURBOX_PLATFORM_CONTRACT_DIGEST"]
+if manifest.get("OURBOX_PLATFORM_CONTRACT_DIGEST") != expected_digest:
+    raise SystemExit("manifest platform contract digest does not match environment fixture")
 if profile.get("OURBOX_APPLICATION_CATALOG_ID") != catalog["catalog_id"]:
     raise SystemExit("profile catalog id mismatch")
 if profile.get("OURBOX_APPLICATION_CATALOG_NAME_SLUG") != expected_slug:
@@ -197,6 +199,7 @@ python3 "${ROOT}/scripts/render-catalog-rows.py" \
 
 python3 - <<'PY' "${TMP_ROOT}/catalog.tsv"
 import csv
+import os
 import sys
 from pathlib import Path
 
@@ -211,7 +214,7 @@ expected = {
     "version": "main-deadbeefcafe",
     "revision": "deadbeefcafedeadbeefcafedeadbeefcafedead",
     "arch": "amd64",
-    "platform_contract_digest": "sha256:bbdb22bf88595c9817c3e90a3171aa4e3ff8571c105e38e689db722a01cebf49",
+    "platform_contract_digest": os.environ["OURBOX_PLATFORM_CONTRACT_DIGEST"],
     "platform_profile": "hello-world",
     "artifact_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
     "pinned_ref": "ghcr.io/example/sw-ourbox-catalog-hello-world@sha256:1111111111111111111111111111111111111111111111111111111111111111",
