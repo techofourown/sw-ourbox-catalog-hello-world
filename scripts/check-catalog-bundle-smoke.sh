@@ -19,7 +19,25 @@ need_cmd sha256sum
 
 python3 -m py_compile "${ROOT}/scripts/render-catalog-rows.py"
 
-python3 - <<'PY' "${ROOT}/catalog/catalog.json" "${ROOT}/catalog/image-sources.json" "${ROOT}/catalog/profile.env"
+WORK_ROOT="${TMP_ROOT}/template-copy"
+mkdir -p "${WORK_ROOT}"
+cp -R "${ROOT}/catalog" "${WORK_ROOT}/catalog"
+cp -R "${ROOT}/scripts" "${WORK_ROOT}/scripts"
+
+python3 - <<'PY' "${WORK_ROOT}/catalog/image-sources.json"
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+payload = json.loads(path.read_text(encoding="utf-8"))
+for entry in payload.get("images", []):
+    name = str(entry["name"])
+    entry["ref"] = f"ghcr.io/example-org/example-apps/{name}@sha256:" + ("1" * 64)
+path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+PY
+
+python3 - <<'PY' "${WORK_ROOT}/catalog/catalog.json" "${WORK_ROOT}/catalog/image-sources.json" "${WORK_ROOT}/catalog/profile.env"
 import json
 import re
 import sys
@@ -100,31 +118,31 @@ PY
 
 export OURBOX_PLATFORM_CONTRACT_DIGEST="sha256:0000000000000000000000000000000000000000000000000000000000000000"
 
-bash "${ROOT}/scripts/render-catalog-bundle.sh"
+bash "${WORK_ROOT}/scripts/render-catalog-bundle.sh"
 
-test -f "${ROOT}/dist/application-catalog-bundle.tar.gz"
-test -f "${ROOT}/dist/application-catalog-bundle.tar.gz.sha256"
-test -f "${ROOT}/dist/images.lock.json"
+test -f "${WORK_ROOT}/dist/application-catalog-bundle.tar.gz"
+test -f "${WORK_ROOT}/dist/application-catalog-bundle.tar.gz.sha256"
+test -f "${WORK_ROOT}/dist/images.lock.json"
 
-expected_sha="$(awk 'NF>=1 {print $1; exit}' "${ROOT}/dist/application-catalog-bundle.tar.gz.sha256")"
-actual_sha="$(sha256sum "${ROOT}/dist/application-catalog-bundle.tar.gz" | awk '{print $1}')"
+expected_sha="$(awk 'NF>=1 {print $1; exit}' "${WORK_ROOT}/dist/application-catalog-bundle.tar.gz.sha256")"
+actual_sha="$(sha256sum "${WORK_ROOT}/dist/application-catalog-bundle.tar.gz" | awk '{print $1}')"
 [[ "${expected_sha}" == "${actual_sha}" ]] || {
   echo "bundle sha mismatch" >&2
   exit 1
 }
 
 mkdir -p "${TMP_ROOT}/extract"
-tar -xzf "${ROOT}/dist/application-catalog-bundle.tar.gz" -C "${TMP_ROOT}/extract"
-cmp -s "${ROOT}/catalog/catalog.json" "${TMP_ROOT}/extract/catalog.json"
-cmp -s "${ROOT}/dist/images.lock.json" "${TMP_ROOT}/extract/images.lock.json"
-cmp -s "${ROOT}/catalog/profile.env" "${TMP_ROOT}/extract/profile.env"
+tar -xzf "${WORK_ROOT}/dist/application-catalog-bundle.tar.gz" -C "${TMP_ROOT}/extract"
+cmp -s "${WORK_ROOT}/catalog/catalog.json" "${TMP_ROOT}/extract/catalog.json"
+cmp -s "${WORK_ROOT}/dist/images.lock.json" "${TMP_ROOT}/extract/images.lock.json"
+cmp -s "${WORK_ROOT}/catalog/profile.env" "${TMP_ROOT}/extract/profile.env"
 
 python3 - <<'PY' \
   "${TMP_ROOT}/extract/manifest.env" \
   "${TMP_ROOT}/extract/profile.env" \
-  "${ROOT}/catalog/catalog.json" \
-  "${ROOT}/catalog/image-sources.json" \
-  "${ROOT}/dist/images.lock.json"
+  "${WORK_ROOT}/catalog/catalog.json" \
+  "${WORK_ROOT}/catalog/image-sources.json" \
+  "${WORK_ROOT}/dist/images.lock.json"
 import json
 import os
 import re
@@ -183,10 +201,10 @@ for image in images_lock["images"]:
         raise SystemExit(f"generated image lock used_by mismatch for {image['name']}")
 PY
 
-python3 "${ROOT}/scripts/render-catalog-rows.py" \
-  --catalog-json "${ROOT}/catalog/catalog.json" \
-  --profile-env "${ROOT}/catalog/profile.env" \
-  --images-lock "${ROOT}/dist/images.lock.json" \
+python3 "${WORK_ROOT}/scripts/render-catalog-rows.py" \
+  --catalog-json "${WORK_ROOT}/catalog/catalog.json" \
+  --profile-env "${WORK_ROOT}/catalog/profile.env" \
+  --images-lock "${WORK_ROOT}/dist/images.lock.json" \
   --out-catalog "${TMP_ROOT}/catalog.tsv" \
   --channel stable \
   --tag "sha-test-run-1" \
@@ -195,10 +213,11 @@ python3 "${ROOT}/scripts/render-catalog-rows.py" \
   --revision "deadbeefcafedeadbeefcafedeadbeefcafedead" \
   --arch amd64 \
   --artifact-digest "sha256:1111111111111111111111111111111111111111111111111111111111111111" \
-  --pinned-ref "ghcr.io/example/sw-ourbox-catalog-hello-world@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  --pinned-ref "ghcr.io/example/sw-ourbox-catalog-example@sha256:1111111111111111111111111111111111111111111111111111111111111111"
 
-python3 - <<'PY' "${TMP_ROOT}/catalog.tsv"
+python3 - <<'PY' "${TMP_ROOT}/catalog.tsv" "${WORK_ROOT}/catalog/profile.env" "${WORK_ROOT}/catalog/catalog.json"
 import csv
+import json
 import os
 import sys
 from pathlib import Path
@@ -207,6 +226,14 @@ rows = list(csv.DictReader(Path(sys.argv[1]).open("r", encoding="utf-8"), delimi
 if len(rows) != 1:
     raise SystemExit(f"expected one rendered catalog row, got {len(rows)}")
 row = rows[0]
+profile = {}
+for raw_line in Path(sys.argv[2]).read_text(encoding="utf-8").splitlines():
+    line = raw_line.strip()
+    if not line or line.startswith("#"):
+        continue
+    key, value = line.split("=", 1)
+    profile[key] = value
+catalog = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
 expected = {
     "channel": "stable",
     "tag": "sha-test-run-1",
@@ -215,9 +242,9 @@ expected = {
     "revision": "deadbeefcafedeadbeefcafedeadbeefcafedead",
     "arch": "amd64",
     "platform_contract_digest": os.environ["OURBOX_PLATFORM_CONTRACT_DIGEST"],
-    "platform_profile": "hello-world",
+    "platform_profile": catalog["catalog_id"],
     "artifact_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
-    "pinned_ref": "ghcr.io/example/sw-ourbox-catalog-hello-world@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "pinned_ref": "ghcr.io/example/sw-ourbox-catalog-example@sha256:1111111111111111111111111111111111111111111111111111111111111111",
 }
 for key, expected_value in expected.items():
     if row.get(key) != expected_value:
