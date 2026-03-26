@@ -14,6 +14,9 @@ selected by the installer and expanded into a concrete application set.
 - the source refs that should be resolved into the published image lock
 - CI that renders and publishes the catalog bundle
 
+Shared tooling scripts are pulled automatically at CI time via `bootstrap.sh`
+from the catalog-tooling OCI artifact. They are not checked into the repo.
+
 ## Consumed application images
 
 - `ghcr.io/techofourown/sw-ourbox-apps-hello-world/hello-world:latest`
@@ -21,18 +24,18 @@ selected by the installer and expanded into a concrete application set.
 
 This repo also publishes installer-browsable catalog rows at
 `ghcr.io/techofourown/sw-ourbox-catalog-hello-world:catalog-amd64`. Those rows
-let host-side installers resolve the newest stable bundle whose
-`OURBOX_PLATFORM_CONTRACT_DIGEST` matches the selected OS payload contract.
+let host-side installers resolve the newest stable pinned bundle for the
+requested channel and architecture.
 
 ## Repository layout
 
+- [bootstrap.sh](/techofourown/sw-ourbox-catalog-hello-world/bootstrap.sh)
+  - pulls shared tooling scripts from the catalog-tooling OCI artifact
 - [catalog/catalog.json](/techofourown/sw-ourbox-catalog-hello-world/catalog/catalog.json)
   - application catalog definition and default app ids
 - [catalog/image-sources.json](/techofourown/sw-ourbox-catalog-hello-world/catalog/image-sources.json)
   - source refs that are resolved into a generated `dist/images.lock.json` during publish
 - [catalog/profile.env](/techofourown/sw-ourbox-catalog-hello-world/catalog/profile.env)
-  - small metadata surface that travels with the rendered bundle, including the required platform-contract digest binding
-- [scripts/render-catalog-bundle.sh](/techofourown/sw-ourbox-catalog-hello-world/scripts/render-catalog-bundle.sh)
-  - renders the distributable bundle
+  - small metadata surface that travels with the rendered bundle
 - [.github/workflows/publish-catalog-bundle.yml](/techofourown/sw-ourbox-catalog-hello-world/.github/workflows/publish-catalog-bundle.yml)
   - publishes the bundle to GHCR
